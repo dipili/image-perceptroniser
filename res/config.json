@@ -1,0 +1,16 @@
+{
+  "tokens": [
+    {
+      "tag": "A",
+      "fileName": "res/a.bmp"
+    },
+    {
+      "tag": "B",
+      "fileName": "res/b.bmp"
+    },
+    {
+      "tag": "C",
+      "fileName": "res/c.bmp"
+    }
+  ]
+}
