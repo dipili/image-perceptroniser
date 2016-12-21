@@ -31,22 +31,25 @@ func main() {
 
         if text == "y" {
             recogniser.Perceptrons[letter].LearnRight(imageToRecognise)
+            return
         } else if text == "n" {
             recogniser.Perceptrons[letter].LearnWrong(imageToRecognise)
         } else {
             fmt.Println("Your input was not recognized.")
+            return
         }
     } else {
         fmt.Println("The letter wasn't recognized")
-        fmt.Println("Please type the letter tag:  ")
-        text = readString()
+    }
 
-        if p, ok := recogniser.Perceptrons[text]; ok {
-            p.LearnRight(imageToRecognise)
-            log.Println("Weight have been updated for unknown input.")
-        } else {
-            fmt.Println("The letter with such tag isn't found.")
-        }
+    fmt.Println("Please type the letter tag:  ")
+    text = readString()
+
+    if p, ok := recogniser.Perceptrons[text]; ok {
+        p.LearnRight(imageToRecognise)
+        log.Println("Weight have been updated for unknown input.")
+    } else {
+        fmt.Println("The letter with such tag isn't found.")
     }
 
     recogniser.SaveWeights()
