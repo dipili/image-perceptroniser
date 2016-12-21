@@ -6,59 +6,77 @@ import (
     "github.com/golang/glog"
     "encoding/json"
     "github.com/diplombmstu/image-perceptroniser/application/utilsf"
+    "errors"
+    "log"
 )
 
 type PerceptronRecogniser struct {
-    perceptrons map[string]*Perceptron
+    Perceptrons map[string]*Perceptron
     images      map[string][][]int
+
+    tokens      []image_packaging.ImageToken
 }
 
 func NewPerceptronRecogniser(configFileName string) *PerceptronRecogniser {
     pr := PerceptronRecogniser{}
 
-    tokens := loadConfig(configFileName)
+    pr.tokens = loadConfig(configFileName)
 
-    for key, token := range tokens {
-        tokens[key].Image = utilsf.LoadImageAsBytes(token.FileName)
+    for key, token := range pr.tokens {
+        pr.tokens[key].Image = utilsf.LoadImageAsBytes(token.FileName)
     }
 
-    pr.perceptrons = make(map[string]*Perceptron)
+    pr.Perceptrons = make(map[string]*Perceptron)
     pr.images = make(map[string][][]int)
 
-    limit := 9
-    for _, token := range tokens {
-        p := NewPerceptron(len(token.Image), len(token.Image[0]), limit)
-        pr.perceptrons[token.Tag] = p
+    limit := 9 // TODO ?
+    for _, token := range pr.tokens {
+        p := &Perceptron{}
+        if data, err := ioutil.ReadFile(token.WeightsFileName); err == nil {
+            if err = json.Unmarshal(data, p); err != nil {
+                glog.Errorln("Failed to get weights from file.", err.Error())
+            }
+        } else {
+            log.Println("A new letter was added to config. ", token.Tag)
+
+            p = NewPerceptron(len(token.Image), len(token.Image[0]), limit)
+            p.LearnRight(token.Image)
+        }
+
+        pr.Perceptrons[token.Tag] = p
         pr.images[token.Tag] = token.Image
     }
 
     result := &pr
 
-    result.train()
-
     return result
 }
 
-func (pr *PerceptronRecogniser) Recognise(input [][]int) string {
-    for key, p := range pr.perceptrons {
-        if p.Recognise(input) {
-            return key
+func (pr *PerceptronRecogniser) SaveWeights() {
+    log.Println("Saving weights to files...")
+
+    for _, token := range pr.tokens {
+        data, err := json.Marshal(pr.Perceptrons[token.Tag])
+        if err != nil {
+            log.Println("Failed to save a weight.", err.Error())
+            continue
+        }
+
+        err = ioutil.WriteFile(token.WeightsFileName, data, 0644)
+        if err != nil {
+            log.Println("Failed to save a weight.", err.Error())
         }
     }
-
-    return "Letter isn't recognised"
 }
 
-func (pr *PerceptronRecogniser) train() {
-    for key := range pr.perceptrons {
-        for k := range pr.perceptrons {
-            if k == key {
-                pr.perceptrons[key].LearnRight(pr.images[k])
-            } else {
-                pr.perceptrons[key].LearnWrong(pr.images[k])
-            }
+func (pr *PerceptronRecogniser) Recognise(input [][]int) (string, error) {
+    for key, p := range pr.Perceptrons {
+        if p.Recognise(input) {
+            return key, nil
         }
     }
+
+    return "", errors.New("Failed to recognize the given letter.")
 }
 
 func loadConfig(fileName string) []image_packaging.ImageToken {

@@ -2,15 +2,18 @@
   "tokens": [
     {
       "tag": "A",
-      "fileName": "res/a.bmp"
+      "fileName": "res/a.bmp",
+      "weightsFileName": "res/aw.json"
     },
     {
       "tag": "B",
-      "fileName": "res/b.bmp"
+      "fileName": "res/b.bmp",
+      "weightsFileName": "res/bw.json"
     },
     {
       "tag": "C",
-      "fileName": "res/c.bmp"
+      "fileName": "res/c.bmp",
+      "weightsFileName": "res/cw.json"
     }
   ]
 }

@@ -5,15 +5,15 @@ import (
 )
 
 type Perceptron struct {
-    weights [][]int
-    limit   int
+    Weights [][]int `json:"weights"`
+    Limit   int `json:"limit"`
 }
 
 func NewPerceptron(width int, height int, limit int) *Perceptron {
     res := Perceptron{}
 
-    res.limit = limit
-    res.weights = utilsf.Create2dArray(width, height)
+    res.Limit = limit
+    res.Weights = utilsf.Create2dArray(width, height)
 
     return &res
 }
@@ -23,11 +23,11 @@ func (p *Perceptron) Recognise(input [][]int) bool {
 
     for i := 0; i < len(input); i++ {
         for j := 0; j < len(input[0]); j++ {
-            sum += input[i][j] * p.weights[i][j]
+            sum += input[i][j] * p.Weights[i][j]
         }
     }
 
-    if sum >= p.limit {
+    if sum >= p.Limit {
         return true
     } else {
         return false
@@ -37,7 +37,7 @@ func (p *Perceptron) Recognise(input [][]int) bool {
 func (p *Perceptron) LearnRight(input [][]int) {
     for i := 0; i < len(input); i++ {
         for j := 0; j < len(input[0]); j++ {
-            p.weights[i][j] += input[i][j]
+            p.Weights[i][j] += input[i][j]
         }
     }
 }
@@ -45,7 +45,7 @@ func (p *Perceptron) LearnRight(input [][]int) {
 func (p *Perceptron) LearnWrong(input [][]int) {
     for i := 0; i < len(input); i++ {
         for j := 0; j < len(input[0]); j++ {
-            p.weights[i][j] -= input[i][j]
+            p.Weights[i][j] -= input[i][j]
         }
     }
 }
